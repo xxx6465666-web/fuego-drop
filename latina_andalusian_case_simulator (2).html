@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>FUEGO DROPS - Ultra Latina & Andalusian Girls Case Simulator</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Inter & Outfit -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            rarity: {
+              consumer: '#b0c3d9',
+              industrial: '#5e98d9',
+              milspec: '#4b69ff',
+              restricted: '#8847ff',
+              classified: '#d32ce6',
+              covert: '#eb4b4b',
+              gold: '#ffd700'
+            },
+            csdark: {
+              950: '#07090e',
+              900: '#0b0e14',
+              800: '#121721',
+              700: '#1a2232',
+              600: '#253046',
+              accent: '#f97316',
+              spicy: '#ef4444'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0b0e14; }
+    ::-webkit-scrollbar-thumb { background: #253046; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #f97316; }
+
+    body {
+      background-color: #07090e;
+      color: #e2e8f0;
+      user-select: none;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Rarity Glow Shadows */
+    .glow-consumer { box-shadow: 0 0 10px rgba(176, 195, 217, 0.2); border-color: #b0c3d9; }
+    .glow-industrial { box-shadow: 0 0 12px rgba(94, 152, 217, 0.25); border-color: #5e98d9; }
+    .glow-milspec { box-shadow: 0 0 15px rgba(75, 105, 255, 0.35); border-color: #4b69ff; }
+    .glow-restricted { box-shadow: 0 0 18px rgba(136, 71, 255, 0.45); border-color: #8847ff; }
+    .glow-classified { box-shadow: 0 0 22px rgba(211, 44, 230, 0.55); border-color: #d32ce6; }
+    .glow-covert { box-shadow: 0 0 28px rgba(235, 75, 75, 0.7); border-color: #eb4b4b; }
+    .glow-gold { box-shadow: 0 0 35px rgba(255, 215, 0, 0.95); border-color: #ffd700; animation: pulseGold 1.5s infinite ease-in-out; }
+
+    @keyframes pulseGold {
+      0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+      50% { box-shadow: 0 0 40px rgba(255, 215, 0, 1); }
+    }
+
+    /* CS2 Spinner Container Styling */
+    .roulette-container {
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(circle, #1a2232 0%, #07090e 100%);
+      border: 2px solid #253046;
+      border-radius: 14px;
+    }
+
+    .roulette-track {
+      display: flex;
+      will-change: transform;
+      transition-timing-function: cubic-bezier(0.08, 0.85, 0.15, 1);
+    }
+
+    .roulette-marker {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 4px;
+      background: #f97316;
+      transform: translateX(-50%);
+      z-index: 20;
+      box-shadow: 0 0 15px #f97316, 0 0 30px #ef4444;
+    }
+    .roulette-marker::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 14px solid #f97316;
+    }
+    .roulette-marker::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 14px solid #f97316;
+    }
+
+    /* Background Particle Canvas */
+    #particleCanvas, #celebrationCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+    }
+    #particleCanvas { z-index: 0; opacity: 0.4; }
+    #celebrationCanvas { z-index: 60; }
+
+    .glass-card {
+      background: rgba(18, 23, 33, 0.88);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Card Item Rarity Top Border Line */
+    .rarity-bar {
+      height: 4px;
+      width: 100%;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+
+    /* 3D Inspect Card Effect */
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .preserve-3d {
+      transform-style: preserve-3d;
+    }
+  </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col justify-between relative overflow-x-hidden">
+
+  <!-- Background Canvas Elements -->
+  <canvas id="particleCanvas"></canvas>
+  <canvas id="celebrationCanvas"></canvas>
+
+  <div class="relative z-10 flex flex-col min-h-screen">
+    
+    <!-- TOP NAVIGATION / HEADER -->
+    <header class="bg-csdark-900/95 border-b border-csdark-600/60 sticky top-0 z-40 backdrop-blur-md">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        
+        <!-- Brand Logo -->
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('cases')">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 via-orange-600 to-red-600 flex items-center justify-center text-xl shadow-lg shadow-orange-500/30">
+            💃
+          </div>
+          <div>
+            <h1 class="font-display font-black text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-red-500">
+              FUEGO DROPS
+            </h1>
+            <p class="text-[9px] text-gray-400 font-extrabold tracking-widest uppercase">Ultra Latina & Andalusian CS2</p>
+          </div>
+        </div>
+
+        <!-- Desktop Navigation Tabs -->
+        <nav class="hidden md:flex items-center space-x-1 lg:space-x-2">
+          <button id="nav-cases" onclick="switchTab('cases')" class="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 bg-csdark-700 text-orange-400 border border-orange-500/30 transition">
+            <i class="fa-solid fa-box-open"></i><span>Cases</span>
+          </button>
+          <button id="nav-battles" onclick="switchTab('battles')" class="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 text-gray-300 hover:bg-csdark-700 hover:text-white transition">
+            <i class="fa-solid fa-swords"></i><span>Case Battles</span>
+          </button>
+          <button id="nav-upgrader" onclick="switchTab('upgrader')" class="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 text-gray-300 hover:bg-csdark-700 hover:text-white transition">
+            <i class="fa-solid fa-chart-line"></i><span>Upgrader</span>
+          </button>
+          <button id="nav-tradeup" onclick="switchTab('tradeup')" class="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 text-gray-300 hover:bg-csdark-700 hover:text-white transition">
+            <i class="fa-solid fa-file-contract"></i><span>Trade-Up</span>
+          </button>
+          <button id="nav-crash" onclick="switchTab('crash')" class="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 text-gray-300 hover:bg-csdark-700 hover:text-white transition">
+            <i class="fa-solid fa-rocket"></i><span>Fuego Crash</span>
+          </button>
+          <button id="nav-inventory" onclick="switchTab('inventory')" class="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 text-gray-300 hover:bg-csdark-700 hover:text-white transition">
+            <i class="fa-solid fa-user-shield"></i><span>Inventory (<span id="inv-count-nav">0</span>)</span>
+          </button>
+        </nav>
+
+        <!-- Balance & Action Controls -->
+        <div class="flex items-center space-x-2 sm:space-x-3">
+          <!-- Balance Pill -->
+          <div class="bg-csdark-950 border border-csdark-600 px-3 py-1.5 rounded-xl flex items-center space-x-2">
+            <i class="fa-solid fa-coins text-amber-400 text-xs sm:text-sm"></i>
+            <span id="user-balance" class="font-display font-extrabold text-amber-400 text-xs sm:text-base">1,000.00</span>
+            <span class="text-[10px] text-gray-400 font-bold">PTS</span>
+          </div>
+
+          <!-- Free Refill Button -->
+          <button onclick="claimDailyBonus()" title="Claim Daily Free PTS" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-3 py-1.5 rounded-xl text-xs font-extrabold transition shadow-lg shadow-emerald-900/30 flex items-center space-x-1">
+            <i class="fa-solid fa-gift"></i>
+            <span class="hidden sm:inline">Daily Bonus</span>
+          </button>
+
+          <!-- Audio Toggle -->
+          <button id="audio-toggle-btn" onclick="toggleMute()" class="bg-csdark-700 text-gray-300 hover:text-white p-2 rounded-xl text-xs transition">
+            <i id="audio-icon" class="fa-solid fa-volume-high text-orange-400"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Navigation Subbar -->
+      <div class="flex md:hidden overflow-x-auto px-3 py-2 bg-csdark-950/90 border-t border-csdark-700/50 space-x-2 no-scrollbar">
+        <button onclick="switchTab('cases')" id="mnav-cases" class="px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap bg-csdark-700 text-orange-400">Cases</button>
+        <button onclick="switchTab('battles')" id="mnav-battles" class="px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap text-gray-300">Battles</button>
+        <button onclick="switchTab('upgrader')" id="mnav-upgrader" class="px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap text-gray-300">Upgrader</button>
+        <button onclick="switchTab('tradeup')" id="mnav-tradeup" class="px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap text-gray-300">Trade-Up</button>
+        <button onclick="switchTab('crash')" id="mnav-crash" class="px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap text-gray-300">Crash</button>
+        <button onclick="switchTab('inventory')" id="mnav-inventory" class="px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap text-gray-300">Inventory</button>
+      </div>
+    </header>
+
+    <!-- LIVE DROPS TICKER BANNER -->
+    <div class="bg-csdark-950/90 border-b border-csdark-700/50 py-1.5 px-4 overflow-hidden">
+      <div class="max-w-7xl mx-auto flex items-center space-x-3">
+        <div class="flex items-center space-x-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">
+          <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+          <span>Live Drops:</span>
+        </div>
+        <div id="live-drops-feed" class="flex items-center space-x-3 overflow-x-auto no-scrollbar py-0.5 text-xs">
+          <!-- Dynamically populated live drops -->
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTAINER AREA -->
+    <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+
+      <!-- ================= SECTION 1: CASES SELECTION & OPENING ================= -->
+      <section id="section-cases" class="space-y-8">
+        
+        <!-- CASE OPENER DISPLAY AREA (When case active) -->
+        <div id="case-opener-wrapper" class="glass-card rounded-2xl p-4 sm:p-6 border border-csdark-600/80 shadow-2xl relative overflow-hidden">
+          
+          <!-- Case Header Details -->
+          <div class="flex flex-col md:flex-row items-center justify-between pb-6 border-b border-csdark-700 gap-4">
+            <div class="flex items-center space-x-4">
+              <div id="active-case-icon" class="text-5xl p-3 bg-csdark-800 rounded-2xl border border-csdark-600 shadow-inner">
+                💃
+              </div>
+              <div>
+                <h2 id="active-case-name" class="text-2xl font-display font-black text-white">Sevilla Nights Case</h2>
+                <p id="active-case-desc" class="text-xs text-gray-400">Fiesta rhythm with fiery Andalusian dancers and flamenco queens.</p>
+              </div>
+            </div>
+
+            <!-- Unboxing Controls -->
+            <div class="flex flex-wrap items-center justify-center md:justify-end gap-2.5 w-full md:w-auto">
+              <!-- Multi-case selectors -->
+              <div class="flex bg-csdark-950 p-1 rounded-xl border border-csdark-700">
+                <button onclick="setMultiCount(1)" id="btn-multi-1" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-orange-500 text-white">1X</button>
+                <button onclick="setMultiCount(2)" id="btn-multi-2" class="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 hover:text-white">2X</button>
+                <button onclick="setMultiCount(3)" id="btn-multi-3" class="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 hover:text-white">3X</button>
+                <button onclick="setMultiCount(5)" id="btn-multi-5" class="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 hover:text-white">5X</button>
+              </div>
+
+              <!-- Fast Spin & Auto Open Toggles -->
+              <button id="toggle-fast" onclick="toggleFastSpin()" class="px-3 py-2 rounded-xl text-xs font-bold bg-csdark-800 border border-csdark-600 text-gray-300 hover:border-orange-500 transition">
+                ⚡ Fast: <span id="fast-spin-status" class="text-red-400">OFF</span>
+              </button>
+
+              <button id="toggle-auto" onclick="toggleAutoSpin()" class="px-3 py-2 rounded-xl text-xs font-bold bg-csdark-800 border border-csdark-600 text-gray-300 hover:border-orange-500 transition">
+                🔄 Auto: <span id="auto-spin-status" class="text-red-400">OFF</span>
+              </button>
+
+              <!-- Main Open Button -->
+              <button id="btn-open-case" onclick="triggerCaseOpen()" class="w-full sm:w-auto px-6 py-3 rounded-xl font-display font-black text-sm sm:text-base bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 hover:from-amber-400 hover:to-red-500 text-white shadow-xl shadow-orange-500/25 transition transform active:scale-95 flex items-center justify-center space-x-2">
+                <span>UNBOX FOR</span>
+                <span id="case-open-price" class="text-yellow-200">50.00 PTS</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ROULETTE SPINNER CONTAINERS (Supports Multi Open) -->
+          <div id="roulette-wrapper" class="py-6 space-y-4">
+            <!-- Spinner Track 1 (Default) -->
+            <div class="roulette-container h-36 w-full">
+              <div class="roulette-marker"></div>
+              <div id="roulette-track-1" class="roulette-track h-full items-center">
+                <!-- Roulette items generated dynamically -->
+              </div>
+            </div>
+            <!-- Dynamic additional tracks for 2x, 3x, 5x appear here -->
+            <div id="extra-roulette-tracks" class="space-y-4"></div>
+          </div>
+
+          <!-- CASE CONTENT PREVIEW LIST -->
+          <div class="pt-4 border-t border-csdark-700">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 flex items-center justify-between">
+              <span>Possible Case Drops (<span id="case-item-count">0</span> Girls)</span>
+              <span class="text-[10px] text-orange-400 font-extrabold">Contains ★ Contraband & StatTrak™ Queens</span>
+            </h3>
+            <div id="case-contents-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              <!-- Cards rendered dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- CASES SELECTION CAROUSEL / GRID -->
+        <div>
+          <h2 class="text-xl font-display font-black text-white mb-4 flex items-center space-x-2">
+            <i class="fa-solid fa-fire text-orange-500"></i>
+            <span>Select Fiesta Cases</span>
+          </h2>
+          <div id="cases-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Cases Cards rendered dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SECTION 2: CASE BATTLES ARENA ================= -->
+      <section id="section-battles" class="hidden space-y-6">
+        <div class="glass-card rounded-2xl p-6 border border-csdark-600">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div>
+              <h2 class="text-2xl font-display font-black text-white flex items-center space-x-2">
+                <span>⚔️ CS2 Case Battles Arena</span>
+              </h2>
+              <p class="text-xs text-gray-400">Battle against AI Queens! Highest total drop value claims ALL unboxed items!</p>
+            </div>
+            
+            <div class="flex items-center space-x-3 w-full md:w-auto">
+              <select id="battle-bot-count" class="bg-csdark-950 text-xs font-bold border border-csdark-600 rounded-xl px-3 py-2.5 text-white flex-grow md:flex-grow-0">
+                <option value="1">1v1 Battle (2 Players)</option>
+                <option value="2">1v1v1 Battle (3 Players)</option>
+                <option value="3">1v1v1v1 Battle (4 Players)</option>
+              </select>
+              <button onclick="startCaseBattle()" class="px-5 py-2.5 rounded-xl font-bold text-xs bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-500 hover:to-orange-400 text-white shadow-lg shadow-red-600/30 transition">
+                Create Battle
+              </button>
+            </div>
+          </div>
+
+          <!-- Battle Arena View -->
+          <div id="battle-arena" class="min-h-[350px] bg-csdark-950/80 rounded-2xl border border-csdark-700 p-4 flex flex-col justify-between">
+            <div id="battle-players-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <!-- Player Slots rendered dynamically -->
+            </div>
+            <div id="battle-status-msg" class="text-center py-4 text-sm font-bold text-gray-400">
+              Select mode and click "Create Battle" to fight for total loot dominance!
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SECTION 3: REBUILD & FIXED UPGRADER ================= -->
+      <section id="section-upgrader" class="hidden space-y-6">
+        <div class="glass-card rounded-2xl p-6 border border-csdark-600 max-w-5xl mx-auto">
+          <div class="text-center mb-6">
+            <h2 class="text-2xl font-display font-black text-white">🔥 Fuego Upgrader Canvas Wheel</h2>
+            <p class="text-xs text-gray-400">Risk an item from your collection to win legendary Latina & Andalusian Queens!</p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            
+            <!-- LEFT COLUMN: STAKED ITEM & MULTIPLIER CONTROLS -->
+            <div class="lg:col-span-4 space-y-4 bg-csdark-950/60 p-4 rounded-xl border border-csdark-700">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">1. Staked Item</h3>
+              <div id="upgrader-selected-item" class="p-4 bg-csdark-900 border-2 border-dashed border-csdark-600 rounded-xl text-center min-h-[110px] flex flex-col items-center justify-center">
+                <p class="text-xs text-gray-500 font-semibold">Select an item from inventory below</p>
+              </div>
+
+              <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 pt-2">2. Target Multiplier</h3>
+              <div class="grid grid-cols-4 gap-2">
+                <button onclick="setUpgraderMultiplier(1.5)" class="py-2 bg-csdark-800 hover:bg-csdark-700 text-xs font-bold rounded-lg border border-csdark-600">1.5x</button>
+                <button onclick="setUpgraderMultiplier(2.0)" class="py-2 bg-csdark-800 hover:bg-csdark-700 text-xs font-bold rounded-lg border border-csdark-600">2.0x</button>
+                <button onclick="setUpgraderMultiplier(5.0)" class="py-2 bg-csdark-800 hover:bg-csdark-700 text-xs font-bold rounded-lg border border-csdark-600">5.0x</button>
+                <button onclick="setUpgraderMultiplier(10.0)" class="py-2 bg-csdark-800 hover:bg-csdark-700 text-xs font-bold rounded-lg border border-csdark-600">10x</button>
+              </div>
+
+              <!-- Custom Multiplier Input -->
+              <div class="flex items-center space-x-2 pt-1">
+                <span class="text-xs font-bold text-gray-400">Custom:</span>
+                <input type="number" id="upgrader-custom-mult" value="2.0" min="1.1" max="100" step="0.1" oninput="onCustomMultInput(this.value)" class="bg-csdark-900 border border-csdark-600 rounded-lg px-2.5 py-1 text-xs font-bold text-amber-400 w-full focus:outline-none">
+              </div>
+            </div>
+
+            <!-- CENTER COLUMN: CANVAS WHEEL & SPIN ACTION -->
+            <div class="lg:col-span-4 flex flex-col items-center justify-center space-y-4">
+              <div class="relative w-64 h-64 flex items-center justify-center">
+                <canvas id="upgraderCanvas" width="256" height="256" class="rounded-full shadow-2xl border-2 border-csdark-600"></canvas>
+                <!-- Central Overlay Stats -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+                  <span id="upgrader-chance-text" class="text-3xl font-black text-white">50.0%</span>
+                  <span class="text-[9px] text-amber-400 uppercase font-black tracking-widest">Win Chance</span>
+                  <span id="upgrader-target-val" class="text-xs font-bold text-gray-300 mt-1">Val: 0.00</span>
+                </div>
+              </div>
+
+              <button id="btn-spin-upgrader" onclick="spinUpgraderCanvas()" disabled class="w-full py-3.5 rounded-xl font-display font-black text-sm bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 hover:from-amber-400 hover:to-red-500 text-white disabled:opacity-40 disabled:cursor-not-allowed shadow-xl shadow-orange-500/20 transition transform active:scale-95">
+                SPIN UPGRADER
+              </button>
+            </div>
+
+            <!-- RIGHT COLUMN: TARGET GIRL AWARD PREVIEW -->
+            <div class="lg:col-span-4 space-y-4 bg-csdark-950/60 p-4 rounded-xl border border-csdark-700">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">3. Target Upgraded Chica</h3>
+              <div id="upgrader-target-preview" class="p-4 bg-csdark-900 border border-csdark-600 rounded-xl text-center min-h-[160px] flex flex-col items-center justify-center space-y-2">
+                <span class="text-4xl">👑</span>
+                <p class="text-xs font-bold text-white">Select stake & multiplier</p>
+                <p class="text-[10px] text-gray-400">Calculated item will appear here</p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- INVENTORY PICKER FOR UPGRADER -->
+          <div class="mt-6 pt-6 border-t border-csdark-700">
+            <h4 class="text-xs font-bold text-gray-400 uppercase mb-3">Select Chica to Stake:</h4>
+            <div id="upgrader-inventory-picker" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2.5 max-h-52 overflow-y-auto p-1">
+              <!-- Cards rendered dynamically -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SECTION 4: TRADE-UP CONTRACT ================= -->
+      <section id="section-tradeup" class="hidden space-y-6">
+        <div class="glass-card rounded-2xl p-6 border border-csdark-600 max-w-4xl mx-auto">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div>
+              <h2 class="text-2xl font-display font-black text-white flex items-center space-x-2">
+                <i class="fa-solid fa-file-contract text-purple-400"></i>
+                <span>Trade-Up Contract (10 Items)</span>
+              </h2>
+              <p class="text-xs text-gray-400">Trade 10 items of the exact same rarity tier to get 1 guaranteed higher tier Chica!</p>
+            </div>
+            
+            <button id="btn-execute-tradeup" onclick="executeTradeUp()" disabled class="w-full md:w-auto px-6 py-3 rounded-xl font-display font-black text-xs sm:text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white disabled:opacity-40 disabled:cursor-not-allowed shadow-lg transition">
+              SIGN & SYNTHESIZE
+            </button>
+          </div>
+
+          <!-- 10 Slot Grid -->
+          <div id="tradeup-slots" class="grid grid-cols-2 sm:grid-cols-5 gap-3 p-4 bg-csdark-950/80 rounded-xl border border-csdark-700 mb-6 min-h-[160px]">
+            <!-- 10 Slots filled dynamically -->
+          </div>
+
+          <!-- Eligible Inventory List -->
+          <div>
+            <h3 class="text-xs font-bold text-gray-400 uppercase mb-3">Click Eligible Items to Add to Contract:</h3>
+            <div id="tradeup-inventory-picker" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 max-h-64 overflow-y-auto p-1">
+              <!-- Inventory rendered dynamically -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SECTION 5: FUEGO CRASH MINIGAME ================= -->
+      <section id="section-crash" class="hidden space-y-6">
+        <div class="glass-card rounded-2xl p-6 border border-csdark-600 max-w-3xl mx-auto text-center">
+          <h2 class="text-2xl font-display font-black text-white mb-1">🚀 Fuego Crash Rocket</h2>
+          <p class="text-xs text-gray-400 mb-6">Watch the multiplier fly! Cash out before the passion rocket explodes!</p>
+
+          <div class="relative w-full h-64 bg-csdark-950 rounded-2xl border border-csdark-700 flex flex-col items-center justify-center overflow-hidden mb-6 shadow-inner">
+            <div id="crash-multiplier-text" class="font-display font-black text-6xl text-amber-400 tracking-wider">1.00x</div>
+            <div id="crash-status-text" class="text-xs font-bold text-gray-400 mt-2 uppercase tracking-widest">Place your bet</div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div class="flex items-center bg-csdark-950 border border-csdark-700 rounded-xl px-3 py-2.5 w-full sm:w-auto">
+              <span class="text-xs font-bold text-gray-400 mr-2">Bet Amount:</span>
+              <input type="number" id="crash-bet-amount" value="50" min="10" class="bg-transparent font-bold text-white text-sm focus:outline-none w-24">
+              <span class="text-xs text-amber-400 font-bold ml-1">PTS</span>
+            </div>
+
+            <button id="btn-crash-action" onclick="handleCrashAction()" class="w-full sm:w-48 py-3 rounded-xl font-display font-black text-xs sm:text-sm bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg transition">
+              PLACE BET
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SECTION 6: USER INVENTORY ================= -->
+      <section id="section-inventory" class="hidden space-y-6">
+        <div class="glass-card rounded-2xl p-6 border border-csdark-600">
+          
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-6 border-b border-csdark-700">
+            <div>
+              <h2 class="text-2xl font-display font-black text-white flex items-center space-x-2">
+                <i class="fa-solid fa-boxes-stacked text-amber-400"></i>
+                <span>Your Chica Collection</span>
+              </h2>
+              <p class="text-xs text-gray-400">Total Value: <span id="inventory-total-value" class="text-amber-400 font-bold">0.00 PTS</span> | Count: <span id="inventory-total-count" class="text-white font-bold">0</span></p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+              <!-- Rarity Filter -->
+              <select id="inv-filter-rarity" onchange="renderInventory()" class="bg-csdark-950 text-xs font-bold border border-csdark-600 rounded-xl px-3 py-2 text-gray-300 flex-grow md:flex-grow-0">
+                <option value="all">All Rarities</option>
+                <option value="covert">Covert / Gold Only</option>
+                <option value="stattrak">StatTrak™ Only</option>
+              </select>
+
+              <!-- Sell All Common Button -->
+              <button onclick="sellAllLowRarity()" class="px-4 py-2 rounded-xl text-xs font-bold bg-red-950/60 text-red-300 border border-red-800/60 hover:bg-red-900 transition">
+                Sell Common/Industrial
+              </button>
+            </div>
+          </div>
+
+          <!-- Inventory Grid -->
+          <div id="inventory-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 min-h-[250px]">
+            <!-- Items rendered dynamically -->
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-csdark-950 border-t border-csdark-700/60 py-6 mt-12 text-center text-xs text-gray-500">
+      <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center space-x-2">
+          <span>💃 Ultra Latina & Andalusian Girls CS2 Case Simulator</span>
+          <span class="text-orange-500 font-bold">• Fuego Edition</span>
+        </div>
+        <div>
+          <span>Simulated CS2 Entertainment • No Real Money Value</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- INSPECT MODAL (CSGO STYLE 3D CARD INSPECT) -->
+  <div id="inspect-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="perspective-1000 w-full max-w-md">
+      <div id="inspect-modal-card" class="glass-card w-full rounded-2xl p-6 border border-csdark-600 relative space-y-4 text-center transform transition-transform duration-200 preserve-3d shadow-2xl">
+        <button onclick="closeInspectModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div id="inspect-rarity-bar" class="h-1.5 w-24 mx-auto rounded-full bg-orange-500 mb-2"></div>
+        
+        <div id="inspect-emoji" class="text-7xl py-4 filter drop-shadow-2xl">💃</div>
+        
+        <div>
+          <div id="inspect-stattrak-badge" class="hidden inline-block text-[10px] font-black uppercase px-2 py-0.5 rounded bg-orange-950 text-orange-400 border border-orange-600 mb-1">
+            StatTrak™ Flirt Counter: <span id="inspect-stattrak-count">0</span>
+          </div>
+          <h3 id="inspect-title" class="text-xl font-display font-black text-white">Queen Title</h3>
+          <p id="inspect-archetype" class="text-xs font-extrabold text-orange-400 uppercase tracking-widest">Andalusian Flamenco Diva</p>
+        </div>
+
+        <!-- Float Bar Visualizer -->
+        <div class="bg-csdark-950 p-3 rounded-xl border border-csdark-700 space-y-1.5 text-left">
+          <div class="flex justify-between text-xs font-bold">
+            <span class="text-gray-400">Wear Condition:</span>
+            <span id="inspect-wear-text" class="text-white">Factory New</span>
+          </div>
+          <div class="flex justify-between text-[11px] text-gray-400">
+            <span>Float Value:</span>
+            <span id="inspect-float-val" class="font-mono text-orange-300">0.012345678</span>
+          </div>
+          <div class="w-full bg-csdark-800 h-2.5 rounded-full overflow-hidden relative border border-csdark-600">
+            <div id="inspect-float-pointer" class="absolute top-0 bottom-0 w-1 bg-white shadow-md" style="left: 10%;"></div>
+          </div>
+        </div>
+
+        <p id="inspect-quote" class="text-xs italic text-gray-300 bg-csdark-950/60 p-3 rounded-xl border border-csdark-700/50">
+          "¡Ay papi, esta noche bailamos hasta el amanecer!"
+        </p>
+
+        <div class="flex items-center justify-between pt-2">
+          <div class="text-left">
+            <span class="text-[10px] text-gray-400 uppercase font-bold block">Market Value</span>
+            <span id="inspect-price" class="text-lg font-black text-amber-400">150.00 PTS</span>
+          </div>
+          <button id="inspect-sell-btn" onclick="sellInspectedItem()" class="px-5 py-2.5 bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold text-xs rounded-xl hover:from-red-500 hover:to-orange-500 shadow-md">
+            Sell Item
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION & ENGINE LOGIC -->
+  <script>
+    /* =========================================================================
+       1. DATA STRUCTURES & SPICY GIRL ARCHETYPES (120+ EMOJI ITEMS)
+       ========================================================================= */
+
+    const RARITIES = {
+      consumer: { name: "Consumer Grade", color: "#b0c3d9", class: "glow-consumer", multiplier: 0.15 },
+      industrial: { name: "Industrial Grade", color: "#5e98d9", class: "glow-industrial", multiplier: 0.4 },
+      milspec: { name: "Mil-Spec", color: "#4b69ff", class: "glow-milspec", multiplier: 1.2 },
+      restricted: { name: "Restricted", color: "#8847ff", class: "glow-restricted", multiplier: 4.5 },
+      classified: { name: "Classified", color: "#d32ce6", class: "glow-classified", multiplier: 18.0 },
+      covert: { name: "Covert", color: "#eb4b4b", class: "glow-covert", multiplier: 75.0 },
+      gold: { name: "★ Contraband Queen", color: "#ffd700", class: "glow-gold", multiplier: 350.0 }
+    };
+
+    const SPICY_QUOTES = [
+      "¡Ay papi, esta noche bailamos hasta el amanecer!",
+      "¡Ole y ole con la gracia y el fuego de Sevilla!",
+      "¡Pura pasión, azúca' y fuego total en la pista!",
+      "¡Sin miedo al éxito, mi corazón sensual!",
+      "¡Azúcar, ritmo y la seducción de la reina!",
+      "¡Baila conmigo en esta fiesta prohibida!",
+      "¡Corazón indomable y salvaje de Andalucía!",
+      "¡Arriba la buena vida, la tentación y la reina!"
+    ];
+
+    // Spicier Archetype definitions expanded to generate over 120 unique items
+    const SPICY_ARCHETYPES = [
+      { emoji: "💃", title: "Sevilla Pasión Flamenca", region: "Andalusia" },
+      { emoji: "💃🏻", title: "Granada Sensual Rose", region: "Andalusia" },
+      { emoji: "💃🏼", title: "Córdoba Temptress Diva", region: "Andalusia" },
+      { emoji: "💃🏽", title: "Málaga Sun Goddess", region: "Andalusia" },
+      { emoji: "💃🏾", title: "Jerez Fire Baroness", region: "Andalusia" },
+      { emoji: "💃🏿", title: "Cádiz Caliente Siren", region: "Andalusia" },
+      { emoji: "👑", title: "Iberian Royal Empress", region: "Spain" },
+      { emoji: "🌹", title: "Fiesta Night Blossom", region: "Sevilla" },
+      { emoji: "👸🏻", title: "Alhambra Palace Princess", region: "Granada" },
+      { emoji: "👸🏽", title: "Costa del Sol Luxury Queen", region: "Marbella" },
+      { emoji: "🌶️", title: "Chili Pepper Diabla", region: "Mexico" },
+      { emoji: "💋", title: "Besos Prohibidos Beauty", region: "Miami" },
+      { emoji: "👙", title: "Copacabana Sensual Goddess", region: "Brazil" },
+      { emoji: "💄", title: "Seducción Glamour Model", region: "Madrid" },
+      { emoji: "✨", title: "Carnaval Samba Superstar", region: "Rio" },
+      { emoji: "🔥", title: "Fuego Infernal Diva", region: "Caribbean" },
+      { emoji: "🩱", title: "Punta Cana Tropic Queen", region: "Dom. Rep." },
+      { emoji: "🌺", title: "Mariposa Sensual Flower", region: "Colombia" },
+      { emoji: "💍", title: "High Roller VIP Chica", region: "Marbella" },
+      { emoji: "🔮", title: "Gitanilla Fortune Empress", region: "Andalusia" }
+    ];
+
+    // Generate balanced database of 120+ unique items
+    const GIRL_ITEMS_DATABASE = [];
+    const RARITY_KEYS = ['consumer', 'industrial', 'milspec', 'restricted', 'classified', 'covert', 'gold'];
+
+    let itemIdCounter = 1;
+
+    RARITY_KEYS.forEach((rarityKey, index) => {
+      const baseValue = Math.pow(index + 1, 2.25) * 8;
+      
+      for (let i = 0; i < 18; i++) {
+        const archetype = SPICY_ARCHETYPES[(i + index * 3) % SPICY_ARCHETYPES.length];
+        GIRL_ITEMS_DATABASE.push({
+          id: `girl_${itemIdCounter++}`,
+          title: `${archetype.title} #${10 + i}`,
+          emoji: archetype.emoji,
+          region: archetype.region,
+          rarity: rarityKey,
+          basePrice: parseFloat((baseValue + (i * (baseValue * 0.12))).toFixed(2)),
+          quote: SPICY_QUOTES[Math.floor(Math.random() * SPICY_QUOTES.length)]
+        });
+      }
+    });
+
+    // CUSTOM CASES CONFIGURATION
+    const CASES_CONFIG = [
+      {
+        id: "case_sevilla",
+        name: "Sevilla Nights Case",
+        icon: "💃",
+        price: 50.00,
+        desc: "Fiesta rhythm with fiery Andalusian dancers and flamenco queens.",
+        rarities: ['consumer', 'industrial', 'milspec', 'restricted', 'classified', 'covert', 'gold']
+      },
+      {
+        id: "case_latina",
+        name: "Latina Passion Case",
+        icon: "🔥",
+        price: 120.00,
+        desc: "Exotic Caribbean, Havana, and Copacabana beach goddesses.",
+        rarities: ['industrial', 'milspec', 'restricted', 'classified', 'covert', 'gold']
+      },
+      {
+        id: "case_flamenco",
+        name: "Flamenco Fire Case",
+        icon: "🌹",
+        price: 250.00,
+        desc: "High probability for Classified & Covert Spanish dancers.",
+        rarities: ['milspec', 'restricted', 'classified', 'covert', 'gold']
+      },
+      {
+        id: "case_royalty",
+        name: "Iberian Royalty Case",
+        icon: "👑",
+        price: 500.00,
+        desc: "Elite Andalusian princesses and high fashion models.",
+        rarities: ['restricted', 'classified', 'covert', 'gold']
+      },
+      {
+        id: "case_fuego",
+        name: "Fuego Spicy Case",
+        icon: "🌶️",
+        price: 1000.00,
+        desc: "High risk, high reward with ultra rare StatTrak™ queens.",
+        rarities: ['classified', 'covert', 'gold']
+      },
+      {
+        id: "case_gold",
+        name: "High Roller Gold Case",
+        icon: "✨",
+        price: 2500.00,
+        desc: "Guaranteed Covert or ★ Contraband Golden Queens!",
+        rarities: ['covert', 'gold']
+      }
+    ];
+
+    /* =========================================================================
+       2. GLOBAL STATE & USER INVENTORY
+       ========================================================================= */
+    let userBalance = 1000.00;
+    let userInventory = [];
+    let activeCase = CASES_CONFIG[0];
+    let multiOpenCount = 1;
+    let isFastSpin = false;
+    let isAutoSpin = false;
+    let isSpinning = false;
+    let soundMuted = false;
+
+    // Upgrader Engine State
+    let upgraderStakedItem = null;
+    let upgraderTargetGirl = null;
+    let upgraderMultiplier = 2.0;
+
+    // Tradeup State
+    let tradeUpSelectedItems = [];
+
+    // Crash State
+    let crashMultiplier = 1.0;
+    let crashInterval = null;
+    let crashActive = false;
+    let crashHasBet = false;
+    let crashBetVal = 0;
+
+    /* =========================================================================
+       3. WEB AUDIO SYNTHESIZER (SPICY SOUND EFFECTS)
+       ========================================================================= */
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) audioCtx = new AudioContext();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playSound(type) {
+      if (soundMuted) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'tick') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(450, now);
+        osc.frequency.exponentialRampToValueAtTime(120, now + 0.035);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.035);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.035);
+      } else if (type === 'win_normal') {
+        // Flamenco Strum Sound
+        [329.63, 415.30, 493.88, 659.25].forEach((freq, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + i * 0.04);
+          gain.gain.setValueAtTime(0.2, now + i * 0.04);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.04 + 0.3);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + i * 0.04);
+          osc.stop(now + i * 0.04 + 0.3);
+        });
+      } else if (type === 'win_rare') {
+        // Spicy Trumpet Brass Fanfare
+        [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+          gain.gain.setValueAtTime(0.25, now + idx * 0.07);
+          gain.gain.linearRampToValueAtTime(0.01, now + idx * 0.07 + 0.45);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + idx * 0.07);
+          osc.stop(now + idx * 0.07 + 0.45);
+        });
+      } else if (type === 'fail') {
+        // Sad Fail Drop
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.linearRampToValueAtTime(80, now + 0.4);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      }
+    }
+
+    function toggleMute() {
+      soundMuted = !soundMuted;
+      document.getElementById('audio-icon').className = soundMuted ? "fa-solid fa-volume-xmark text-gray-500" : "fa-solid fa-volume-high text-orange-400";
+    }
+
+    /* =========================================================================
+       4. CELEBRATION CANVAS PARTICLES
+       ========================================================================= */
+
+    function triggerCelebrationParticles() {
+      const canvas = document.getElementById('celebrationCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = Array.from({ length: 90 }, () => ({
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+        vx: (Math.random() - 0.5) * 18,
+        vy: (Math.random() - 0.5) * 18,
+        size: Math.random() * 8 + 4,
+        color: ['#ffd700', '#f97316', '#ef4444', '#d32ce6', '#ffffff'][Math.floor(Math.random() * 5)],
+        alpha: 1.0
+      }));
+
+      let frames = 0;
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.alpha -= 0.018;
+
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = Math.max(0, p.alpha);
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        frames++;
+        if (frames < 60) requestAnimationFrame(render);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+
+      render();
+    }
+
+    /* =========================================================================
+       5. ITEM HELPER FUNCTIONS (FLOAT, WEAR, STATTRAK, ROLL LOGIC)
+       ========================================================================= */
+
+    function generateFloat() {
+      return Math.random();
+    }
+
+    function getWearCondition(floatVal) {
+      if (floatVal < 0.07) return { code: "FN", name: "Factory New", color: "#10b981" };
+      if (floatVal < 0.15) return { code: "MW", name: "Minimal Wear", color: "#3b82f6" };
+      if (floatVal < 0.38) return { code: "FT", name: "Field-Tested", color: "#eab308" };
+      if (floatVal < 0.45) return { code: "WW", name: "Well-Worn", color: "#f97316" };
+      return { code: "BS", name: "Battle-Scarred", color: "#ef4444" };
+    }
+
+    function calculateFinalPrice(basePrice, floatVal, isStatTrak, isSouvenir) {
+      let multiplier = (1.25 - (floatVal * 0.45));
+      if (isStatTrak) multiplier *= 2.5;
+      if (isSouvenir) multiplier *= 1.8;
+      return parseFloat((basePrice * multiplier).toFixed(2));
+    }
+
+    function getRandomItemFromCase(caseObj) {
+      const rand = Math.random() * 100;
+      let rarity = 'consumer';
+
+      if (rand < 0.3 && caseObj.rarities.includes('gold')) rarity = 'gold';
+      else if (rand < 1.2 && caseObj.rarities.includes('covert')) rarity = 'covert';
+      else if (rand < 4.5 && caseObj.rarities.includes('classified')) rarity = 'classified';
+      else if (rand < 13.0 && caseObj.rarities.includes('restricted')) rarity = 'restricted';
+      else if (rand < 32.0 && caseObj.rarities.includes('milspec')) rarity = 'milspec';
+      else if (rand < 65.0 && caseObj.rarities.includes('industrial')) rarity = 'industrial';
+      else rarity = caseObj.rarities[0] || 'consumer';
+
+      const matchingItems = GIRL_ITEMS_DATABASE.filter(item => item.rarity === rarity);
+      const baseItem = matchingItems[Math.floor(Math.random() * matchingItems.length)] || GIRL_ITEMS_DATABASE[0];
+
+      const floatVal = generateFloat();
+      const isStatTrak = Math.random() < 0.14;
+      const isSouvenir = !isStatTrak && Math.random() < 0.08;
+
+      const wear = getWearCondition(floatVal);
+      const finalPrice = calculateFinalPrice(baseItem.basePrice, floatVal, isStatTrak, isSouvenir);
+
+      return {
+        instanceId: 'inst_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+        ...baseItem,
+        floatVal: floatVal,
+        wear: wear,
+        isStatTrak: isStatTrak,
+        isSouvenir: isSouvenir,
+        charmCount: isStatTrak ? Math.floor(Math.random() * 999) + 1 : 0,
+        price: finalPrice
+      };
+    }
+
+    /* =========================================================================
+       6. ROULETTE & UNBOXING ENGINE
+       ========================================================================= */
+
+    function setupRouletteTrack(trackElemId, winningItem) {
+      const track = document.getElementById(trackElemId);
+      track.innerHTML = '';
+
+      const totalItems = 50;
+      const winIndex = 38;
+      const itemsList = [];
+
+      for (let i = 0; i < totalItems; i++) {
+        if (i === winIndex) {
+          itemsList.push(winningItem);
+        } else {
+          itemsList.push(getRandomItemFromCase(activeCase));
+        }
+      }
+
+      itemsList.forEach((item) => {
+        const rarityCfg = RARITIES[item.rarity];
+        const card = document.createElement('div');
+        card.className = `min-w-[130px] w-[130px] h-[120px] mx-1.5 bg-csdark-800 rounded-xl border flex flex-col items-center justify-between p-2 flex-shrink-0 relative overflow-hidden ${rarityCfg.class}`;
+        card.style.borderColor = rarityCfg.color;
+
+        card.innerHTML = `
+          <div class="rarity-bar" style="background-color: ${rarityCfg.color};"></div>
+          <div class="text-3xl py-1 filter drop-shadow">${item.emoji}</div>
+          <div class="text-center w-full">
+            <p class="text-[10px] font-bold text-white truncate px-1">${item.title}</p>
+            <p class="text-[9px] font-semibold text-gray-400">${item.wear.code} • <span class="text-amber-400">${item.price}</span></p>
+          </div>
+        `;
+        track.appendChild(card);
+      });
+
+      return { winIndex, itemWidth: 142 };
+    }
+
+    function triggerCaseOpen() {
+      if (isSpinning) return;
+
+      const totalCost = activeCase.price * multiOpenCount;
+      if (userBalance < totalCost) {
+        alert("Insufficient PTS balance! Claim your Daily Bonus.");
+        return;
+      }
+
+      updateBalance(-totalCost);
+      isSpinning = true;
+      document.getElementById('btn-open-case').disabled = true;
+
+      const wins = [];
+      const tracksToAnimate = [];
+
+      const win1 = getRandomItemFromCase(activeCase);
+      wins.push(win1);
+      const meta1 = setupRouletteTrack('roulette-track-1', win1);
+      tracksToAnimate.push({ id: 'roulette-track-1', winItem: win1, ...meta1 });
+
+      const extraContainer = document.getElementById('extra-roulette-tracks');
+      extraContainer.innerHTML = '';
+
+      for (let i = 2; i <= multiOpenCount; i++) {
+        const trackId = `roulette-track-${i}`;
+        const trackDiv = document.createElement('div');
+        trackDiv.className = 'roulette-container h-36 w-full relative';
+        trackDiv.innerHTML = `
+          <div class="roulette-marker"></div>
+          <div id="${trackId}" class="roulette-track h-full items-center"></div>
+        `;
+        extraContainer.appendChild(trackDiv);
+
+        const winExtra = getRandomItemFromCase(activeCase);
+        wins.push(winExtra);
+        const metaExtra = setupRouletteTrack(trackId, winExtra);
+        tracksToAnimate.push({ id: trackId, winItem: winExtra, ...metaExtra });
+      }
+
+      const duration = isFastSpin ? 1.2 : 4.8;
+
+      tracksToAnimate.forEach((t) => {
+        const trackElem = document.getElementById(t.id);
+        trackElem.style.transition = 'none';
+        trackElem.style.transform = 'translateX(0px)';
+        trackElem.offsetHeight;
+
+        const containerWidth = trackElem.parentElement.clientWidth;
+        const randomTargetOffset = (Math.random() * 80) - 40;
+        const targetX = -((t.winIndex * t.itemWidth) - (containerWidth / 2) + (t.itemWidth / 2) + randomTargetOffset);
+
+        trackElem.style.transition = `transform ${duration}s cubic-bezier(0.08, 0.85, 0.15, 1)`;
+        trackElem.style.transform = `translateX(${targetX}px)`;
+      });
+
+      let ticks = 0;
+      const intervalTime = isFastSpin ? 80 : 160;
+      const soundInterval = setInterval(() => {
+        ticks++;
+        playSound('tick');
+        if (ticks > (isFastSpin ? 12 : 28)) clearInterval(soundInterval);
+      }, intervalTime);
+
+      setTimeout(() => {
+        clearInterval(soundInterval);
+        isSpinning = false;
+        document.getElementById('btn-open-case').disabled = false;
+
+        wins.forEach(winItem => {
+          userInventory.unshift(winItem);
+          pushLiveDropFeed(winItem);
+
+          if (winItem.rarity === 'covert' || winItem.rarity === 'gold') {
+            playSound('win_rare');
+            triggerCelebrationParticles();
+          } else {
+            playSound('win_normal');
+          }
+        });
+
+        renderInventory();
+
+        if (isAutoSpin && userBalance >= activeCase.price * multiOpenCount) {
+          setTimeout(triggerCaseOpen, 600);
+        }
+
+      }, duration * 1000 + 100);
+    }
+
+    /* =========================================================================
+       7. FULL CANVAS UPGRADER ENGINE (FIXED & SPICED UP)
+       ========================================================================= */
+
+    let upgraderWheelAngle = 0;
+    let upgraderIsSpinning = false;
+
+    function drawUpgraderCanvas(winAngleDeg = 180, currentPointerAngleDeg = 0) {
+      const canvas = document.getElementById('upgraderCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const radius = 110;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Background Outer Ring
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.fillStyle = '#0b0e14';
+      ctx.fill();
+      ctx.lineWidth = 10;
+      ctx.strokeStyle = '#1a2232';
+      ctx.stroke();
+
+      // Red Loss Slice (360 Deg)
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius - 8, 0, Math.PI * 2);
+      ctx.fillStyle = '#991b1b';
+      ctx.fill();
+
+      // Green Winning Slice Arc (Centered at top)
+      const winRad = (winAngleDeg * Math.PI) / 180;
+      const startAngle = -Math.PI / 2 - (winRad / 2);
+      const endAngle = -Math.PI / 2 + (winRad / 2);
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, radius - 8, startAngle, endAngle);
+      ctx.fillStyle = '#10b981';
+      ctx.fill();
+
+      // Center Disc
+      ctx.beginPath();
+      ctx.arc(cx, cy, 50, 0, Math.PI * 2);
+      ctx.fillStyle = '#121721';
+      ctx.fill();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#f97316';
+      ctx.stroke();
+
+      // Pointer Needle
+      const ptrRad = ((currentPointerAngleDeg - 90) * Math.PI) / 180;
+      const px = cx + (radius - 12) * Math.cos(ptrRad);
+      const py = cy + (radius - 12) * Math.sin(ptrRad);
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(px, py);
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = '#ffd700';
+      ctx.stroke();
+
+      // Needle Head Dot
+      ctx.beginPath();
+      ctx.arc(px, py, 6, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+    }
+
+    function renderUpgraderInventory() {
+      const picker = document.getElementById('upgrader-inventory-picker');
+      picker.innerHTML = '';
+
+      userInventory.forEach(item => {
+        const card = document.createElement('div');
+        card.className = "bg-csdark-800 p-2 rounded-xl border border-csdark-600 text-center cursor-pointer hover:border-orange-500 transition";
+        card.onclick = () => selectUpgraderItem(item);
+        card.innerHTML = `
+          <div class="text-2xl">${item.emoji}</div>
+          <p class="text-[10px] font-bold text-white truncate">${item.title}</p>
+          <p class="text-[9px] font-black text-amber-400">${item.price.toFixed(2)}</p>
+        `;
+        picker.appendChild(card);
+      });
+
+      drawUpgraderCanvas(180, 0);
+    }
+
+    function selectUpgraderItem(item) {
+      upgraderStakedItem = item;
+      const rarityCfg = RARITIES[item.rarity];
+
+      document.getElementById('upgrader-selected-item').innerHTML = `
+        <div class="text-3xl">${item.emoji}</div>
+        <p class="text-xs font-bold text-white">${item.title}</p>
+        <p class="text-xs font-black text-amber-400">${item.price.toFixed(2)} PTS</p>
+      `;
+
+      recalculateUpgraderTarget();
+      document.getElementById('btn-spin-upgrader').disabled = false;
+    }
+
+    function setUpgraderMultiplier(mult) {
+      upgraderMultiplier = parseFloat(mult);
+      document.getElementById('upgrader-custom-mult').value = mult;
+      recalculateUpgraderTarget();
+    }
+
+    function onCustomMultInput(val) {
+      const parsed = parseFloat(val);
+      if (!isNaN(parsed) && parsed >= 1.1 && parsed <= 100) {
+        upgraderMultiplier = parsed;
+        recalculateUpgraderTarget();
+      }
+    }
+
+    function recalculateUpgraderTarget() {
+      if (!upgraderStakedItem) return;
+
+      const winChancePercent = Math.min(95.0, (100 / upgraderMultiplier)).toFixed(1);
+      const targetVal = (upgraderStakedItem.price * upgraderMultiplier).toFixed(2);
+
+      document.getElementById('upgrader-chance-text').innerText = `${winChancePercent}%`;
+      document.getElementById('upgrader-target-val').innerText = `Val: ${targetVal} PTS`;
+
+      // Find best target girl matching target val
+      const eligibleGirls = GIRL_ITEMS_DATABASE.filter(g => g.basePrice <= targetVal * 1.5);
+      const targetGirlBase = eligibleGirls[eligibleGirls.length - 1] || GIRL_ITEMS_DATABASE[GIRL_ITEMS_DATABASE.length - 1];
+
+      upgraderTargetGirl = {
+        instanceId: 'inst_upg_' + Date.now(),
+        ...targetGirlBase,
+        price: parseFloat(targetVal),
+        floatVal: 0.01,
+        wear: { code: "FN", name: "Factory New", color: "#10b981" },
+        isStatTrak: true,
+        charmCount: 777
+      };
+
+      const rarityCfg = RARITIES[upgraderTargetGirl.rarity];
+      document.getElementById('upgrader-target-preview').innerHTML = `
+        <span class="text-4xl filter drop-shadow">${upgraderTargetGirl.emoji}</span>
+        <p class="text-xs font-bold text-white">${upgraderTargetGirl.title}</p>
+        <p class="text-xs font-black text-amber-400">${upgraderTargetGirl.price.toFixed(2)} PTS</p>
+        <span class="text-[9px] uppercase px-2 py-0.5 rounded font-black text-white" style="background-color: ${rarityCfg.color}">${rarityCfg.name}</span>
+      `;
+
+      const winAngleDeg = (winChancePercent / 100) * 360;
+      drawUpgraderCanvas(winAngleDeg, 0);
+    }
+
+    function spinUpgraderCanvas() {
+      if (!upgraderStakedItem || upgraderIsSpinning) return;
+
+      upgraderIsSpinning = true;
+      document.getElementById('btn-spin-upgrader').disabled = true;
+
+      const winChancePercent = parseFloat((100 / upgraderMultiplier).toFixed(1));
+      const winAngleDeg = (winChancePercent / 100) * 360;
+
+      // Determine outcome
+      const randVal = Math.random() * 100;
+      const isWin = randVal <= winChancePercent;
+
+      // Calculate Target Angle (Winning zone is centered at top: [-winAngleDeg/2, winAngleDeg/2])
+      let landingAngle = 0;
+      if (isWin) {
+        landingAngle = (Math.random() * (winAngleDeg - 10)) - (winAngleDeg / 2 - 5);
+      } else {
+        const halfWin = winAngleDeg / 2;
+        landingAngle = halfWin + 10 + Math.random() * (360 - winAngleDeg - 20);
+      }
+
+      // 5 full rotations + landing angle
+      const totalDegrees = 360 * 5 + landingAngle;
+      let currentDeg = 0;
+      const startTime = performance.now();
+      const spinDuration = 3500; // ms
+
+      function animateSpin(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / spinDuration);
+        
+        // Cubic ease out
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        currentDeg = totalDegrees * easeOut;
+
+        const normalizedAngle = (currentDeg % 360 + 360) % 360;
+        drawUpgraderCanvas(winAngleDeg, normalizedAngle);
+
+        if (Math.floor(elapsed / 120) > Math.floor((elapsed - 16) / 120)) {
+          playSound('tick');
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(animateSpin);
+        } else {
+          upgraderIsSpinning = false;
+          
+          // Remove staked item
+          userInventory = userInventory.filter(i => i.instanceId !== upgraderStakedItem.instanceId);
+
+          if (isWin) {
+            userInventory.unshift(upgraderTargetGirl);
+            playSound('win_rare');
+            triggerCelebrationParticles();
+            alert(`🎉 UPGRADE SUCCESSFUL! You won ${upgraderTargetGirl.title} worth ${upgraderTargetGirl.price.toFixed(2)} PTS!`);
+          } else {
+            playSound('fail');
+            alert("💥 UPGRADE FAILED! Staked Chica was destroyed.");
+          }
+
+          upgraderStakedItem = null;
+          document.getElementById('upgrader-selected-item').innerHTML = `<p class="text-xs text-gray-500 font-semibold">Select an item from inventory below</p>`;
+          renderUpgraderInventory();
+          renderInventory();
+        }
+      }
+
+      requestAnimationFrame(animateSpin);
+    }
+
+    /* =========================================================================
+       8. UI NAVIGATION & CONTROL HANDLERS
+       ========================================================================= */
+
+    function switchTab(tabName) {
+      ['cases', 'battles', 'upgrader', 'tradeup', 'crash', 'inventory'].forEach(t => {
+        const sec = document.getElementById(`section-${t}`);
+        const nav = document.getElementById(`nav-${t}`);
+        const mnav = document.getElementById(`mnav-${t}`);
+        if (sec) sec.classList.add('hidden');
+        if (nav) nav.className = "px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 text-gray-300 hover:bg-csdark-700 hover:text-white transition";
+        if (mnav) mnav.className = "px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap text-gray-300";
+      });
+
+      const activeSec = document.getElementById(`section-${tabName}`);
+      const activeNav = document.getElementById(`nav-${tabName}`);
+      const activeMnav = document.getElementById(`mnav-${tabName}`);
+      if (activeSec) activeSec.classList.remove('hidden');
+      if (activeNav) activeNav.className = "px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 bg-csdark-700 text-orange-400 border border-orange-500/30 transition";
+      if (activeMnav) activeMnav.className = "px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap bg-csdark-700 text-orange-400";
+
+      if (tabName === 'upgrader') renderUpgraderInventory();
+      if (tabName === 'tradeup') renderTradeUpInventory();
+    }
+
+    function setMultiCount(count) {
+      multiOpenCount = count;
+      [1, 2, 3, 5].forEach(n => {
+        const btn = document.getElementById(`btn-multi-${n}`);
+        if (btn) btn.className = n === count ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-orange-500 text-white" : "px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 hover:text-white";
+      });
+      document.getElementById('case-open-price').innerText = `${(activeCase.price * count).toFixed(2)} PTS`;
+    }
+
+    function toggleFastSpin() {
+      isFastSpin = !isFastSpin;
+      document.getElementById('fast-spin-status').innerText = isFastSpin ? "ON" : "OFF";
+      document.getElementById('fast-spin-status').className = isFastSpin ? "text-emerald-400" : "text-red-400";
+    }
+
+    function toggleAutoSpin() {
+      isAutoSpin = !isAutoSpin;
+      document.getElementById('auto-spin-status').innerText = isAutoSpin ? "ON" : "OFF";
+      document.getElementById('auto-spin-status').className = isAutoSpin ? "text-emerald-400" : "text-red-400";
+    }
+
+    function updateBalance(amount) {
+      userBalance += amount;
+      document.getElementById('user-balance').innerText = userBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function claimDailyBonus() {
+      updateBalance(500.00);
+      playSound('win_rare');
+      triggerCelebrationParticles();
+      alert("🎉 Claimed Daily Free Reward of +500.00 PTS!");
+    }
+
+    function pushLiveDropFeed(item) {
+      const feed = document.getElementById('live-drops-feed');
+      const dropPill = document.createElement('div');
+      const rarityCfg = RARITIES[item.rarity];
+      dropPill.className = `flex items-center space-x-2 bg-csdark-800 border px-2.5 py-1 rounded-lg flex-shrink-0 shadow-md`;
+      dropPill.style.borderColor = rarityCfg.color;
+
+      dropPill.innerHTML = `
+        <span class="text-base">${item.emoji}</span>
+        <span class="font-bold text-white text-[11px] truncate max-w-[100px]">${item.title}</span>
+        <span class="text-[10px] text-amber-400 font-extrabold">${item.price}</span>
+      `;
+
+      feed.insertBefore(dropPill, feed.firstChild);
+      if (feed.children.length > 12) feed.removeChild(feed.lastChild);
+    }
+
+    /* =========================================================================
+       9. CASE SELECTION & PREVIEW RENDER
+       ========================================================================= */
+
+    function selectCase(caseId) {
+      activeCase = CASES_CONFIG.find(c => c.id === caseId) || CASES_CONFIG[0];
+      
+      document.getElementById('active-case-icon').innerText = activeCase.icon;
+      document.getElementById('active-case-name').innerText = activeCase.name;
+      document.getElementById('active-case-desc').innerText = activeCase.desc;
+      document.getElementById('case-open-price').innerText = `${(activeCase.price * multiOpenCount).toFixed(2)} PTS`;
+
+      renderCaseContentsGrid();
+      setupRouletteTrack('roulette-track-1', getRandomItemFromCase(activeCase));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderCasesGrid() {
+      const container = document.getElementById('cases-grid');
+      container.innerHTML = '';
+
+      CASES_CONFIG.forEach(c => {
+        const card = document.createElement('div');
+        card.className = "glass-card rounded-2xl p-5 border border-csdark-600 hover:border-orange-500/50 transition cursor-pointer flex flex-col justify-between space-y-4 group shadow-lg";
+        card.onclick = () => selectCase(c.id);
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="text-4xl p-3 bg-csdark-800 rounded-xl group-hover:scale-110 transition transform">${c.icon}</div>
+            <span class="text-lg font-black text-amber-400 bg-amber-950/40 border border-amber-800/40 px-3 py-1 rounded-xl">${c.price.toFixed(2)} PTS</span>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-white group-hover:text-orange-400 transition">${c.name}</h3>
+            <p class="text-xs text-gray-400 mt-1">${c.desc}</p>
+          </div>
+          <button class="w-full py-2.5 rounded-xl font-bold text-xs bg-csdark-700 hover:bg-orange-500 hover:text-white text-gray-200 transition">
+            UNBOX CASE
+          </button>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderCaseContentsGrid() {
+      const container = document.getElementById('case-contents-grid');
+      container.innerHTML = '';
+
+      const possibleItems = GIRL_ITEMS_DATABASE.filter(item => activeCase.rarities.includes(item.rarity));
+      document.getElementById('case-item-count').innerText = possibleItems.length;
+
+      possibleItems.forEach(item => {
+        const rarityCfg = RARITIES[item.rarity];
+        const card = document.createElement('div');
+        card.className = `bg-csdark-800/80 rounded-xl p-3 border flex flex-col items-center justify-between text-center relative overflow-hidden ${rarityCfg.class}`;
+        card.style.borderColor = rarityCfg.color;
+
+        card.innerHTML = `
+          <div class="rarity-bar" style="background-color: ${rarityCfg.color};"></div>
+          <div class="text-4xl py-2 filter drop-shadow">${item.emoji}</div>
+          <div class="w-full">
+            <p class="text-xs font-bold text-white truncate">${item.title}</p>
+            <p class="text-[10px] text-gray-400 font-semibold">${item.region} • ~${item.basePrice} PTS</p>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    /* =========================================================================
+       10. INVENTORY VIEW & 3D INSPECT MODAL
+       ========================================================================= */
+
+    function renderInventory() {
+      const container = document.getElementById('inventory-grid');
+      container.innerHTML = '';
+
+      document.getElementById('inv-count-nav').innerText = userInventory.length;
+      document.getElementById('inventory-total-count').innerText = userInventory.length;
+
+      const totalVal = userInventory.reduce((acc, i) => acc + i.price, 0);
+      document.getElementById('inventory-total-value').innerText = `${totalVal.toFixed(2)} PTS`;
+
+      const filter = document.getElementById('inv-filter-rarity').value;
+
+      const filteredItems = userInventory.filter(item => {
+        if (filter === 'covert') return item.rarity === 'covert' || item.rarity === 'gold';
+        if (filter === 'stattrak') return item.isStatTrak;
+        return true;
+      });
+
+      if (filteredItems.length === 0) {
+        container.innerHTML = `<div class="col-span-full text-center py-12 text-xs font-bold text-gray-500">No Chica items in collection. Open cases or win battles!</div>`;
+        return;
+      }
+
+      filteredItems.forEach(item => {
+        const rarityCfg = RARITIES[item.rarity];
+        const card = document.createElement('div');
+        card.className = `bg-csdark-800/90 rounded-xl p-3 border flex flex-col items-center justify-between text-center relative cursor-pointer hover:scale-105 transition ${rarityCfg.class}`;
+        card.style.borderColor = rarityCfg.color;
+        card.onclick = () => openInspectModal(item);
+
+        card.innerHTML = `
+          ${item.isStatTrak ? '<span class="absolute top-1 left-1 bg-orange-600 text-white text-[8px] font-black px-1 rounded">ST</span>' : ''}
+          <div class="text-4xl py-2 filter drop-shadow">${item.emoji}</div>
+          <div class="w-full">
+            <p class="text-xs font-bold text-white truncate">${item.title}</p>
+            <p class="text-[10px] font-bold text-amber-400 mt-1">${item.price.toFixed(2)} PTS</p>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    let inspectedItemCurrent = null;
+
+    function openInspectModal(item) {
+      inspectedItemCurrent = item;
+      const rarityCfg = RARITIES[item.rarity];
+
+      document.getElementById('inspect-modal').classList.remove('hidden');
+      document.getElementById('inspect-emoji').innerText = item.emoji;
+      document.getElementById('inspect-title').innerText = item.title;
+      document.getElementById('inspect-archetype').innerText = `${rarityCfg.name} • ${item.region}`;
+      document.getElementById('inspect-wear-text').innerText = `${item.wear.name} (${item.wear.code})`;
+      document.getElementById('inspect-wear-text').style.color = item.wear.color;
+      document.getElementById('inspect-float-val').innerText = item.floatVal.toFixed(8);
+      document.getElementById('inspect-float-pointer').style.left = `${(item.floatVal * 100).toFixed(1)}%`;
+      document.getElementById('inspect-quote').innerText = `"${item.quote}"`;
+      document.getElementById('inspect-price').innerText = `${item.price.toFixed(2)} PTS`;
+
+      const stBadge = document.getElementById('inspect-stattrak-badge');
+      if (item.isStatTrak) {
+        stBadge.classList.remove('hidden');
+        document.getElementById('inspect-stattrak-count').innerText = item.charmCount;
+      } else {
+        stBadge.classList.add('hidden');
+      }
+
+      document.getElementById('inspect-rarity-bar').style.backgroundColor = rarityCfg.color;
+
+      // Enable 3D Tilt Listener
+      const card = document.getElementById('inspect-modal-card');
+      window.onmousemove = (e) => {
+        const x = (window.innerWidth / 2 - e.clientX) / 25;
+        const y = (window.innerHeight / 2 - e.clientY) / 25;
+        card.style.transform = `rotateY(${-x}deg) rotateX(${y}deg)`;
+      };
+    }
+
+    function closeInspectModal() {
+      document.getElementById('inspect-modal').classList.add('hidden');
+      window.onmousemove = null;
+    }
+
+    function sellInspectedItem() {
+      if (!inspectedItemCurrent) return;
+      updateBalance(inspectedItemCurrent.price);
+      userInventory = userInventory.filter(i => i.instanceId !== inspectedItemCurrent.instanceId);
+      closeInspectModal();
+      renderInventory();
+      playSound('win_normal');
+    }
+
+    function sellAllLowRarity() {
+      const lowRarityItems = userInventory.filter(i => i.rarity === 'consumer' || i.rarity === 'industrial');
+      const totalEarned = lowRarityItems.reduce((acc, i) => acc + i.price, 0);
+
+      userInventory = userInventory.filter(i => i.rarity !== 'consumer' && i.rarity !== 'industrial');
+      updateBalance(totalEarned);
+      renderInventory();
+      playSound('win_normal');
+    }
+
+    /* =========================================================================
+       11. CASE BATTLES ARENA MODE
+       ========================================================================= */
+
+    function startCaseBattle() {
+      const botCount = parseInt(document.getElementById('battle-bot-count').value);
+      const battleCost = activeCase.price * 3;
+
+      if (userBalance < battleCost) {
+        alert("Insufficient PTS balance for Battle entry!");
+        return;
+      }
+
+      updateBalance(-battleCost);
+
+      const grid = document.getElementById('battle-players-grid');
+      grid.innerHTML = '';
+
+      const players = [{ id: 'user', name: 'You (Player)', drops: [], totalVal: 0 }];
+      for (let b = 1; b <= botCount; b++) {
+        players.push({ id: `bot_${b}`, name: `Queen Bot #${b}`, drops: [], totalVal: 0 });
+      }
+
+      players.forEach(p => {
+        const slot = document.createElement('div');
+        slot.id = `battle-slot-${p.id}`;
+        slot.className = "bg-csdark-800 rounded-2xl p-4 border border-csdark-600 flex flex-col space-y-3";
+        slot.innerHTML = `
+          <div class="flex items-center justify-between pb-2 border-b border-csdark-700">
+            <span class="font-bold text-xs text-white">${p.name}</span>
+            <span id="battle-val-${p.id}" class="font-black text-amber-400 text-sm">0.00 PTS</span>
+          </div>
+          <div id="battle-drops-${p.id}" class="grid grid-cols-3 gap-2 min-h-[100px]"></div>
+        `;
+        grid.appendChild(slot);
+      });
+
+      document.getElementById('battle-status-msg').innerText = "⚔️ Battle in progress! Unboxing 3 rounds...";
+
+      let round = 0;
+      const battleInterval = setInterval(() => {
+        round++;
+
+        players.forEach(p => {
+          const drop = getRandomItemFromCase(activeCase);
+          p.drops.push(drop);
+          p.totalVal += drop.price;
+
+          document.getElementById(`battle-val-${p.id}`).innerText = `${p.totalVal.toFixed(2)} PTS`;
+          
+          const dropsBox = document.getElementById(`battle-drops-${p.id}`);
+          const rarityCfg = RARITIES[drop.rarity];
+
+          const dropCard = document.createElement('div');
+          dropCard.className = `p-2 bg-csdark-950 rounded-xl border text-center ${rarityCfg.class}`;
+          dropCard.style.borderColor = rarityCfg.color;
+          dropCard.innerHTML = `
+            <div class="text-2xl">${drop.emoji}</div>
+            <p class="text-[9px] font-bold text-white truncate">${drop.title}</p>
+          `;
+          dropsBox.appendChild(dropCard);
+        });
+
+        playSound('tick');
+
+        if (round >= 3) {
+          clearInterval(battleInterval);
+          
+          let winner = players[0];
+          players.forEach(p => {
+            if (p.totalVal > winner.totalVal) winner = p;
+          });
+
+          const allLoot = players.flatMap(p => p.drops);
+          const totalPotValue = allLoot.reduce((acc, d) => acc + d.price, 0);
+
+          if (winner.id === 'user') {
+            document.getElementById('battle-status-msg').innerHTML = `<span class="text-emerald-400 font-extrabold text-base">🎉 VICTORY! You won the entire pot worth ${totalPotValue.toFixed(2)} PTS!</span>`;
+            allLoot.forEach(d => userInventory.unshift(d));
+            renderInventory();
+            playSound('win_rare');
+            triggerCelebrationParticles();
+          } else {
+            document.getElementById('battle-status-msg').innerHTML = `<span class="text-red-400 font-extrabold text-base">👑 ${winner.name} claimed the pot of ${totalPotValue.toFixed(2)} PTS!</span>`;
+            playSound('fail');
+          }
+        }
+      }, 1400);
+    }
+
+    /* =========================================================================
+       12. TRADE-UP CONTRACT MODE
+       ========================================================================= */
+
+    function renderTradeUpInventory() {
+      const picker = document.getElementById('tradeup-inventory-picker');
+      picker.innerHTML = '';
+
+      userInventory.forEach(item => {
+        if (item.rarity === 'covert' || item.rarity === 'gold') return;
+
+        const card = document.createElement('div');
+        card.className = "bg-csdark-800 p-2 rounded-xl border border-csdark-600 text-center cursor-pointer hover:border-purple-500 transition";
+        card.onclick = () => addTradeUpItem(item);
+        card.innerHTML = `
+          <div class="text-2xl">${item.emoji}</div>
+          <p class="text-[10px] font-bold text-white truncate">${item.title}</p>
+          <p class="text-[9px] text-purple-400 font-bold uppercase">${item.rarity}</p>
+        `;
+        picker.appendChild(card);
+      });
+
+      renderTradeUpSlots();
+    }
+
+    function addTradeUpItem(item) {
+      if (tradeUpSelectedItems.length >= 10) return;
+
+      if (tradeUpSelectedItems.length > 0 && tradeUpSelectedItems[0].rarity !== item.rarity) {
+        alert("All 10 items in Trade-Up Contract must have the exact same rarity tier!");
+        return;
+      }
+
+      if (tradeUpSelectedItems.some(i => i.instanceId === item.instanceId)) return;
+
+      tradeUpSelectedItems.push(item);
+      renderTradeUpSlots();
+    }
+
+    function renderTradeUpSlots() {
+      const slotsDiv = document.getElementById('tradeup-slots');
+      slotsDiv.innerHTML = '';
+
+      for (let i = 0; i < 10; i++) {
+        const item = tradeUpSelectedItems[i];
+        const slot = document.createElement('div');
+        slot.className = "h-24 bg-csdark-900 rounded-xl border border-csdark-600 flex flex-col items-center justify-center p-2 relative";
+
+        if (item) {
+          slot.innerHTML = `
+            <div class="text-2xl">${item.emoji}</div>
+            <p class="text-[9px] font-bold text-white truncate w-full text-center">${item.title}</p>
+            <button onclick="removeTradeUpItem('${item.instanceId}')" class="absolute top-1 right-1 text-red-400 text-xs"><i class="fa-solid fa-circle-xmark"></i></button>
+          `;
+        } else {
+          slot.innerHTML = `<span class="text-xs font-bold text-gray-600">Slot #${i + 1}</span>`;
+        }
+
+        slotsDiv.appendChild(slot);
+      }
+
+      document.getElementById('btn-execute-tradeup').disabled = tradeUpSelectedItems.length < 10;
+    }
+
+    function removeTradeUpItem(instId) {
+      tradeUpSelectedItems = tradeUpSelectedItems.filter(i => i.instanceId !== instId);
+      renderTradeUpSlots();
+    }
+
+    function executeTradeUp() {
+      if (tradeUpSelectedItems.length < 10) return;
+
+      const currentRarity = tradeUpSelectedItems[0].rarity;
+      const rarityIdx = RARITY_KEYS.indexOf(currentRarity);
+      const nextRarity = RARITY_KEYS[rarityIdx + 1] || RARITY_KEYS[RARITY_KEYS.length - 1];
+
+      const instIds = tradeUpSelectedItems.map(i => i.instanceId);
+      userInventory = userInventory.filter(i => !instIds.includes(i.instanceId));
+
+      const matchingItems = GIRL_ITEMS_DATABASE.filter(i => i.rarity === nextRarity);
+      const synthBase = matchingItems[Math.floor(Math.random() * matchingItems.length)];
+
+      const synthItem = {
+        instanceId: 'inst_synth_' + Date.now(),
+        ...synthBase,
+        floatVal: 0.02,
+        wear: { code: "FN", name: "Factory New", color: "#10b981" },
+        isStatTrak: Math.random() < 0.3,
+        charmCount: 150,
+        price: parseFloat((synthBase.basePrice * 1.85).toFixed(2))
+      };
+
+      userInventory.unshift(synthItem);
+      tradeUpSelectedItems = [];
+
+      playSound('win_rare');
+      triggerCelebrationParticles();
+      alert(`📜 CONTRACT EXECUTED! Synthesized Guaranteed ${synthItem.title} (${RARITIES[nextRarity].name})!`);
+
+      renderTradeUpInventory();
+      renderInventory();
+    }
+
+    /* =========================================================================
+       13. FUEGO CRASH MINIGAME
+       ========================================================================= */
+
+    function handleCrashAction() {
+      const btn = document.getElementById('btn-crash-action');
+
+      if (!crashActive && !crashHasBet) {
+        const betInput = parseInt(document.getElementById('crash-bet-amount').value);
+        if (userBalance < betInput) {
+          alert("Insufficient PTS for Crash Bet!");
+          return;
+        }
+
+        updateBalance(-betInput);
+        crashBetVal = betInput;
+        crashHasBet = true;
+        crashActive = true;
+        crashMultiplier = 1.0;
+
+        btn.innerText = "CASH OUT";
+        btn.className = "w-full sm:w-48 py-3 rounded-xl font-display font-black text-xs sm:text-sm bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg";
+
+        const crashPoint = 1.0 + Math.random() * 9.0;
+
+        crashInterval = setInterval(() => {
+          crashMultiplier += 0.03;
+          document.getElementById('crash-multiplier-text').innerText = `${crashMultiplier.toFixed(2)}x`;
+
+          if (crashMultiplier >= crashPoint) {
+            clearInterval(crashInterval);
+            crashActive = false;
+            crashHasBet = false;
+            playSound('fail');
+            document.getElementById('crash-multiplier-text').innerText = "💥 CRASHED!";
+            document.getElementById('crash-status-text').innerText = `Exploded at ${crashPoint.toFixed(2)}x`;
+            btn.innerText = "PLACE BET";
+            btn.className = "w-full sm:w-48 py-3 rounded-xl font-display font-black text-xs sm:text-sm bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg";
+          }
+        }, 90);
+
+      } else if (crashActive && crashHasBet) {
+        clearInterval(crashInterval);
+        crashActive = false;
+        crashHasBet = false;
+
+        const winVal = parseFloat((crashBetVal * crashMultiplier).toFixed(2));
+        updateBalance(winVal);
+        playSound('win_normal');
+
+        document.getElementById('crash-status-text').innerText = `Cashed out at ${crashMultiplier.toFixed(2)}x! Won ${winVal} PTS!`;
+        btn.innerText = "PLACE BET";
+        btn.className = "w-full sm:w-48 py-3 rounded-xl font-display font-black text-xs sm:text-sm bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg";
+      }
+    }
+
+    /* =========================================================================
+       14. PARTICLE CANVAS BACKGROUND
+       ========================================================================= */
+
+    function initParticles() {
+      const canvas = document.getElementById('particleCanvas');
+      const ctx = canvas.getContext('2d');
+
+      let width = (canvas.width = window.innerWidth);
+      let height = (canvas.height = window.innerHeight);
+
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+
+      const particles = Array.from({ length: 45 }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: Math.random() * 3 + 1,
+        speedY: -(Math.random() * 1.5 + 0.5),
+        opacity: Math.random() * 0.7 + 0.2
+      }));
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+
+        particles.forEach(p => {
+          p.y += p.speedY;
+          if (p.y < 0) {
+            p.y = height;
+            p.x = Math.random() * width;
+          }
+
+          ctx.fillStyle = `rgba(249, 115, 22, ${p.opacity})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    }
+
+    /* =========================================================================
+       15. INITIALIZATION
+       ========================================================================= */
+
+    window.onload = function() {
+      renderCasesGrid();
+      selectCase('case_sevilla');
+      initParticles();
+
+      // Starter Drop
+      const starterDrop = getRandomItemFromCase(CASES_CONFIG[0]);
+      userInventory.push(starterDrop);
+      renderInventory();
+    };
+  </script>
+</body>
+</html>
